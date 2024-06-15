@@ -106,7 +106,7 @@
             Report
           </Button>
           <Button class="instance-button" disabled>
-            <HeartIcon />
+            <HeartIcon :fill="followsProject ? 'currentColor' : 'transparent'" aria-hidden="true" />
             Follow
           </Button>
         </div>
@@ -222,9 +222,19 @@
   <ModInstallModal ref="modInstallModal" />
   <IncompatibilityWarningModal ref="incompatibilityWarning" />
   <ContextMenu ref="options" @option-clicked="handleOptionsClick">
-    <template #install> <DownloadIcon /> Install </template>
-    <template #open_link> <GlobeIcon /> Open in Modrinth <ExternalIcon /> </template>
-    <template #copy_link> <ClipboardCopyIcon /> Copy link </template>
+    <template #install>
+      <DownloadIcon />
+      Install
+    </template>
+    <template #open_link>
+      <GlobeIcon />
+      Open in Modrinth
+      <ExternalIcon />
+    </template>
+    <template #copy_link>
+      <ClipboardCopyIcon />
+      Copy link
+    </template>
   </ContextMenu>
 </template>
 
@@ -272,7 +282,7 @@ import {
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useRoute } from 'vue-router'
-import { ref, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { installVersionDependencies, isOffline } from '@/helpers/utils'
 import InstallConfirmModal from '@/components/ui/InstallConfirmModal.vue'
 import ModInstallModal from '@/components/ui/ModInstallModal.vue'
@@ -283,6 +293,7 @@ import { handleError } from '@/store/notifications.js'
 import { convertFileSrc } from '@tauri-apps/api/tauri'
 import ContextMenu from '@/components/ui/ContextMenu.vue'
 import { mixpanel_track } from '@/helpers/mixpanel'
+import { useUser } from '@/store/user.js'
 
 const route = useRoute()
 const breadcrumbs = useBreadcrumbs()
@@ -304,6 +315,7 @@ const installed = ref(false)
 const installedVersion = ref(null)
 
 const offline = ref(await isOffline())
+const user = await useUser()
 
 async function fetchProjectData() {
   ;[
@@ -345,6 +357,16 @@ watch(
 )
 
 dayjs.extend(relativeTime)
+
+const followsProject = computed(() => {
+  for (const project of user.follows) {
+    if (project.id === data.value.id) {
+      return true
+    }
+  }
+
+  return false
+})
 
 const markInstalled = () => {
   installed.value = true

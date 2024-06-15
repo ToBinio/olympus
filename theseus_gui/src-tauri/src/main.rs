@@ -92,6 +92,7 @@ fn main() {
             }
 
             let win = app.get_window("main").unwrap();
+                  win.open_devtools();
             #[cfg(not(target_os = "linux"))]
             {
                 use window_shadows::set_shadow;
