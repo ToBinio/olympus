@@ -1,0 +1,2 @@
+ALTER TABLE settings
+ADD allow_multi_instance INTEGER NOT NULL DEFAULT FALSE;

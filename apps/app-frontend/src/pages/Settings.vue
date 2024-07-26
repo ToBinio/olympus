@@ -78,6 +78,7 @@ watch(
 )
 
 const javaVersions = ref(await get_java_versions().catch(handleError))
+
 async function updateJavaVersion(version) {
   if (version?.path === '') {
     version.path = undefined
@@ -151,6 +152,24 @@ async function findLauncherDir() {
           <LogInIcon />
           Sign in
         </button>
+      </div>
+      <div class="adjacent-input">
+        <label for="allow_multi_instance">
+          <span class="label__title">Allow Multiple Windows</span>
+          <span class="label__description"
+            >Allow to open the Modrinth APP multiple Times (app restart required).</span
+          >
+        </label>
+        <Toggle
+          id="allow_multi_instance"
+          :model-value="settings.allow_multi_instance"
+          :checked="settings.allow_multi_instance"
+          @update:model-value="
+            (e) => {
+              settings.allow_multi_instance = e
+            }
+          "
+        />
       </div>
       <label for="theme">
         <span class="label__title">App directory</span>

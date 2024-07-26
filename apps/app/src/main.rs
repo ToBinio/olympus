@@ -16,8 +16,15 @@ mod macos;
 #[tracing::instrument(skip_all)]
 #[tauri::command]
 async fn initialize_state(app: tauri::AppHandle) -> api::Result<()> {
-    theseus::EventState::init(app).await?;
+    theseus::EventState::init(app.app_handle()).await?;
     State::init().await?;
+
+    let settings = settings::get().await?;
+    println!("{:?}", settings);
+    if settings.allow_multi_instance {
+        app.remove_plugin("single-instance");
+        tauri_plugin_single_instance::destroy(&app);
+    }
 
     Ok(())
 }
@@ -89,6 +96,9 @@ fn main() {
                 tracing::error!("Error registering deep link handler: {}", e);
             }
 
+            app.handle().remove_plugin("single-instance");
+            tauri_plugin_single_instance::destroy(app);
+
             let win = app.get_window("main").unwrap();
             #[cfg(not(target_os = "linux"))]
             {
@@ -145,7 +155,6 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             initialize_state,
             is_dev,
-            toggle_decorations,
             api::auth::auth_login,
             api::mr_auth::modrinth_auth_login,
         ]);
